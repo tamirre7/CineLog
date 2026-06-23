@@ -2,7 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-// Import the secure database connection (this triggers the connection log)
+// Swagger and File System Imports
+const swaggerUi = require('swagger-ui-express');
+const yaml = require('js-yaml');
+const fs = require('fs');
+
+// Import the secure database connection
 require('./db/database');
 
 // Import our routes
@@ -11,20 +16,24 @@ const mediaRoutes = require('./routes/mediaRoutes');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ==========================================
 // Middlewares
+app.use(cors());
+app.use(express.json());
+
 // ==========================================
-app.use(cors()); // Allow requests from the React frontend
-app.use(express.json()); // Allow the server to parse JSON data
+// Swagger Configuration (External YAML)
+// ==========================================
+// Read the YAML file from the hard drive and parse it into a JavaScript object
+const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yaml', 'utf8'));
+
+// Setup the Swagger UI route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // ==========================================
 // API Routes (Forwarding)
 // ==========================================
-
-// Forward any request starting with '/api/media' to the mediaRoutes file
 app.use('/api/media', mediaRoutes);
 
-// Simple health check route to verify the server is running
 app.get('/api/health', (req, res) => {
   res
     .status(200)
@@ -36,4 +45,5 @@ app.get('/api/health', (req, res) => {
 // ==========================================
 app.listen(port, () => {
   console.log(`🚀 CineLog Server is running on http://localhost:${port}`);
+  console.log(`📄 Swagger docs available at http://localhost:${port}/api-docs`);
 });
