@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info:
+  title: CineLog API
+  version: 1.0.0
+  description: API documentation for the CineLog media tracking app
+paths:
+  /api/media:
+    get:
+      summary: Retrieve all media items
+      tags:
+        - Media
+      responses:
+        '200':
+          description: A list of all media items
